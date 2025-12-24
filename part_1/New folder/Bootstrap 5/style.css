@@ -1,0 +1,12 @@
+.navbar {
+    z-index: 1050 !important; 
+}
+
+.offcanvas {
+    z-index: 1030 !important; 
+    top: 56px !important;
+}
+/* Offcanvas sidebar ka width adjust karo */
+#mysidebar {
+    width: 200px; /* Aap apne requirement ke hisaab se adjust kar sakte ho */
+}

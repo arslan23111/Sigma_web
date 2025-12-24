@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager App</title>
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+    body {background:#f5f5f5;display:flex;justify-content:center;padding:20px;}
+    .container {width:100%;max-width:500px;background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+    header {text-align:center;margin-bottom:20px;}
+    header h1 {font-size:28px;color:#333;}
+    .task-input {display:flex;gap:10px;margin-bottom:20px;}
+    .task-input input {flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;font-size:16px;}
+    .task-input button {padding:10px 20px;background:#007bff;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:16px;}
+    .task-input button:hover {background:#0056b3;}
+    .filters {display:flex;justify-content:space-between;margin-bottom:20px;}
+    .filters button {flex:1;padding:10px;margin:0 5px;border:none;border-radius:8px;cursor:pointer;transition:0.3s;}
+    .filters button.active {box-shadow:0 0 5px #007bff;transform:scale(1.05);}
+    .filters button.all {background:#e0e0e0;color:#000;}
+    .filters button.active-filter {background:lightgreen;color:#000;}
+    .filters button.completed-filter {background:green;color:#fff;}
+    .task-list {list-style:none;}
+    .task {background:#fafafa;padding:12px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border:1px solid #ddd;transition:0.2s;}
+    .task.completed .text {text-decoration:line-through;color:gray;}
+    .task button {background:red;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+    .task:hover {box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+    @media (max-width:480px){.task-input button{padding:10px;}.filters button{font-size:14px;padding:8px;}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Task Manager App</h1>
+    </header>
+
+    <div class="task-input">
+      <input type="text" id="taskInput" placeholder="Enter a task..." />
+      <button onclick="addTask()">Add</button>
+    </div>
+
+    <div class="filters">
+      <button class="all active" onclick="setFilter('all')">All</button>
+      <button class="active-filter" onclick="setFilter('active')">Active</button>
+      <button class="completed-filter" onclick="setFilter('completed')">Completed</button>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Search tasks..." onkeyup="applySearch()" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-bottom:15px;" />
+
+    <select id="sortSelect" onchange="applySort()" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-bottom:15px;">
+      <option value="newest">Sort: Newest</option>
+      <option value="oldest">Sort: Oldest</option>
+    </select>
+
+    <ul class="task-list" id="taskList"></ul>
+  </div>
+
+  <script>
+    let tasks = [];
+    let filter = 'all';
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      if (!text) return;
+      tasks.push({ text, completed: false, date: Date.now(), status: 'active' });
+      saveTasks();
+      input.value = '';
+      renderTasks();
+    }
+
+    function toggleTask(index) {
+      tasks[index].completed = !tasks[index].completed;
+      tasks[index].status = tasks[index].completed ? 'completed' : 'active';
+      saveTasks();
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+    }
+
+    function setFilter(type) {
+      filter = type;
+      document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
+      if(type==='all') document.querySelector('.filters button.all').classList.add('active');
+      if(type==='active') document.querySelector('.filters button.active-filter').classList.add('active');
+      if(type==='completed') document.querySelector('.filters button.completed-filter').classList.add('active');
+      renderTasks();
+    }
+
+    function applySearch(){ renderTasks(); }
+    function applySort(){ renderTasks(); }
+
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+
+      let filtered = tasks.filter(task =>
+        filter==='active'?task.status==='active':
+        filter==='completed'?task.status==='completed':true
+      );
+
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      if(search) filtered = filtered.filter(t=>t.text.toLowerCase().includes(search));
+
+      const sort = document.getElementById('sortSelect').value;
+      filtered = filtered.sort((a,b)=>sort==='newest'?b.date-a.date:a.date-b.date);
+
+      filtered.forEach((task,i)=>{
+        const li = document.createElement('li');
+        li.className = `task ${task.completed?'completed':''}`;
+        const taskDate = new Date(task.date);
+        const formattedDate = taskDate.toLocaleDateString()+' '+taskDate.toLocaleTimeString();
+        li.innerHTML = `
+          <div style="display:flex;flex-direction:column;">
+            <span class="text" onclick="toggleTask(${i})">${task.text}</span>
+            <small style="color:gray;font-size:12px;">${formattedDate}</small>
+          </div>
+          <div>
+            <button style="background:orange;margin-right:5px;" onclick="editTask(${i})">Edit</button>
+            <button onclick="deleteTask(${i})">X</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function editTask(index){
+      const newText = prompt('Update your task:', tasks[index].text);
+      if(newText && newText.trim()!==''){
+        tasks[index].text = newText.trim();
+        saveTasks();
+        renderTasks();
+      }
+    }
+
+    function saveTasks(){ localStorage.setItem('tasks', JSON.stringify(tasks)); }
+    function loadTasks(){ tasks = JSON.parse(localStorage.getItem('tasks'))||[]; renderTasks(); }
+
+    window.onload = loadTasks;
+  </script>
+</body>
+</html>
