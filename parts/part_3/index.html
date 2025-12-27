@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>css selector</title>
+    <style>
+        /* class selector example */
+        .red {
+            background-color: red;
+        }
+        /* id selector example */
+        #green {
+            background-color: green;
+        }
+
+        /* child selector example */
+        .red > p {
+            color: rgb(0, 17, 255);
+            background-color: brown;
+            font-size: 20px;
+        }
+
+        /* pseudo class selector example */
+
+        a:visited {
+           color: orange;
+        }
+        a:hover {
+            color: purple;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <div class="red">
+        i am a div
+
+        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ex perferendis, dignissimos temporibus ab ea quasi earum atque! Unde commodi velit corrupti sed, ratione necessitatibus nisi animi natus eos molestias quisquam?</p>
+    </div>
+    <div id="green">
+        iam another div
+    </div>
+
+    <a href="https://www.google.com">Go to google</a>
+</body>
+</html>
